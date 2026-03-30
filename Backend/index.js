@@ -1,11 +1,11 @@
-
+require('dotenv').config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
@@ -30,12 +30,11 @@ const rentSchema = new mongoose.Schema({
 const Product = mongoose.model("Product", productSchema);
 const Rent = mongoose.model("Rent", rentSchema);
 
-
 // ----------------------
 // Sample products
 // ----------------------
 const products = [
-   { name: "Sofa", price: 5000, image: "https://tse2.mm.bing.net/th/id/OIP.zonjMZycVTQ6PMcf2vjqIQHaFj?rs=1&pid=ImgDetMain&o=7&rm=3" },
+ { name: "Sofa", price: 5000, image: "https://tse2.mm.bing.net/th/id/OIP.zonjMZycVTQ6PMcf2vjqIQHaFj?rs=1&pid=ImgDetMain&o=7&rm=3" },
   { name: "Dining Table", price: 3000, image: "https://thumbs.dreamstime.com/b/modern-dining-table-set-white-dishes-glassware-bright-clean-interior-contemporary-design-neutral-colors-332092613.jpg" },
   { name: "Bed", price: 4000, image: "https://tse1.mm.bing.net/th/id/OIP.kWKhP-xIf4jLxNLo3RETOwHaHa?rs=1&pid=ImgDetMain&o=7&rm=3" },
   { name: "Chair", price: 800, image: "https://ik.imagekit.io/2xkwa8s1i/img/npl_raw_images/Revamp/WDINEARVWOAC1MBBK/WDINEARVWOAC1MBBK-1.jpg?tr=w-640" },
@@ -57,13 +56,12 @@ const products = [
   { name:"Fan", price:1400, image:"https://tse4.mm.bing.net/th/id/OIP.XD7hERA_EUYHIcOH-PooJAHaEO?rs=1&pid=ImgDetMain&o=7&rm=3"}
 ];
 
-
 // ----------------------
-// Connect MongoDB
+// Connect MongoDB Atlas
 // ----------------------
-mongoose.connect("mongodb://127.0.0.1:27017/furnitureDB")
+mongoose.connect(process.env.MONGO_URI)
   .then(async () => {
-    console.log("✅ MongoDB Connected");
+    console.log("✅ MongoDB Atlas Connected");
 
     const count = await Product.countDocuments();
     if (count === 0) {
@@ -71,8 +69,7 @@ mongoose.connect("mongodb://127.0.0.1:27017/furnitureDB")
       console.log("🔥 Sample products inserted");
     }
   })
-  .catch(err => console.log(err));
-
+  .catch(err => console.log("❌ MongoDB connection error:", err));
 // ----------------------
 // OTP Store
 // ----------------------
@@ -84,8 +81,8 @@ let otpStore = {};
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "furniturerent2026@gmail.com",
-    pass: "jzokgdfkdludgere"
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
   }
 });
 
@@ -95,9 +92,7 @@ const transporter = nodemailer.createTransport({
 app.post("/api/send-otp", async (req, res) => {
   const { email } = req.body;
 
-  if (!email) {
-    return res.status(400).json({ message: "Email required" });
-  }
+  if (!email) return res.status(400).json({ message: "Email required" });
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   otpStore[email] = otp;
@@ -146,27 +141,16 @@ app.post("/api/rent", async (req, res) => {
     if (!otpStore[email] || otpStore[email] !== otp) {
       return res.status(400).json({ message: "Invalid OTP" });
     }
-
     delete otpStore[email];
 
     let product = null;
-
-    // Try find in DB
     if (mongoose.Types.ObjectId.isValid(productId)) {
       product = await Product.findById(productId);
     }
-
-    // fallback (for frontend products)
-    if (!product) {
-      product = {
-        name: productId,
-        price: 1000
-      };
-    }
+    if (!product) product = { name: productId, price: 1000 };
 
     const totalPrice = product.price * duration;
 
-    // ✅ SAVE RENT
     await Rent.create({
       productName: product.name,
       email,
@@ -174,13 +158,9 @@ app.post("/api/rent", async (req, res) => {
       totalPrice
     });
 
-    // ✅ SEND EMAIL
     await sendConfirmationEmail(email, product.name, totalPrice, duration);
 
-    res.status(200).json({
-      message: "Rent successful & email sent",
-      totalPrice
-    });
+    res.status(200).json({ message: "Rent successful & email sent", totalPrice });
 
   } catch (err) {
     console.error(err);
@@ -192,29 +172,17 @@ app.post("/api/rent", async (req, res) => {
 // Get Products
 // ----------------------
 app.get("/api/products", async (req, res) => {
-  const data = await Product.find();
-  res.json(data);
+  try {
+    const data = await Product.find();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch products" });
+  }
 });
 
 // ----------------------
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  console.log(`🚀 Server running on port ${PORT}`);});
 
 
 
@@ -239,24 +207,31 @@ app.listen(PORT, () => {
 // app.use(express.json());
 
 // // ----------------------
-// // Schema & Model
+// // Schemas
 // // ----------------------
 // const productSchema = new mongoose.Schema({
 //   name: String,
 //   price: Number,
 //   image: String
 // });
+
+// const rentSchema = new mongoose.Schema({
+//   productName: String,
+//   email: String,
+//   duration: Number,
+//   totalPrice: Number,
+//   date: { type: Date, default: Date.now }
+// });
+
 // const Product = mongoose.model("Product", productSchema);
-
-
-
+// const Rent = mongoose.model("Rent", rentSchema);
 
 
 // // ----------------------
-// // Sample products (with external image URLs)
+// // Sample products
 // // ----------------------
 // const products = [
-//   { name: "Sofa", price: 5000, image: "https://tse2.mm.bing.net/th/id/OIP.zonjMZycVTQ6PMcf2vjqIQHaFj?rs=1&pid=ImgDetMain&o=7&rm=3" },
+//    { name: "Sofa", price: 5000, image: "https://tse2.mm.bing.net/th/id/OIP.zonjMZycVTQ6PMcf2vjqIQHaFj?rs=1&pid=ImgDetMain&o=7&rm=3" },
 //   { name: "Dining Table", price: 3000, image: "https://thumbs.dreamstime.com/b/modern-dining-table-set-white-dishes-glassware-bright-clean-interior-contemporary-design-neutral-colors-332092613.jpg" },
 //   { name: "Bed", price: 4000, image: "https://tse1.mm.bing.net/th/id/OIP.kWKhP-xIf4jLxNLo3RETOwHaHa?rs=1&pid=ImgDetMain&o=7&rm=3" },
 //   { name: "Chair", price: 800, image: "https://ik.imagekit.io/2xkwa8s1i/img/npl_raw_images/Revamp/WDINEARVWOAC1MBBK/WDINEARVWOAC1MBBK-1.jpg?tr=w-640" },
@@ -278,92 +253,173 @@ app.listen(PORT, () => {
 //   { name:"Fan", price:1400, image:"https://tse4.mm.bing.net/th/id/OIP.XD7hERA_EUYHIcOH-PooJAHaEO?rs=1&pid=ImgDetMain&o=7&rm=3"}
 // ];
 
+
 // // ----------------------
-// // Connect to MongoDB
-// // ----------------------
+// // Connect MongoDB
+
 // mongoose.connect("mongodb://127.0.0.1:27017/furnitureDB")
 //   .then(async () => {
-//     console.log("✅ Connected to MongoDB");
+//     console.log("✅ MongoDB Connected");
 
-//     // Insert sample data if empty
 //     const count = await Product.countDocuments();
 //     if (count === 0) {
 //       await Product.insertMany(products);
-//       console.log("✅ Sample Data Inserted");
+//       console.log("🔥 Sample products inserted");
 //     }
 //   })
-//   .catch(err => console.error("❌ MongoDB connection error:", err));
+//   .catch(err => console.log(err));
 
 // // ----------------------
-// // Email Function
+// // OTP Store
 // // ----------------------
-// async function sendConfirmationEmail(toEmail, productName, totalPrice, duration) {
-//   const transporter = nodemailer.createTransport({
-//     service: "gmail",
-//     auth: {
-//       user: "furniturerent2026@gmail.com", // replace with env var
-//       pass: "jzokgdfkdludgere"             // replace with env var
-//     }
-//   });
+// let otpStore = {};
 
-//   const mailOptions = {
-//     from: "furniturerent2026@gmail.com",
-//     to: toEmail,
-//     subject: "Rent Confirmation - RentEase",
+// // ----------------------
+// // Mail Setup
+// // ----------------------
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   auth: {
+//     user: "furniturerent2026@gmail.com",
+//     pass: "jzokgdfkdludgere"
+//   }
+// });
+
+// // ----------------------
+// // Send OTP
+// // ----------------------
+// app.post("/api/send-otp", async (req, res) => {
+//   const { email } = req.body;
+
+//   if (!email) {
+//     return res.status(400).json({ message: "Email required" });
+//   }
+
+//   const otp = Math.floor(100000 + Math.random() * 900000).toString();
+//   otpStore[email] = otp;
+
+//   try {
+//     await transporter.sendMail({
+//       from: "RentEase",
+//       to: email,
+//       subject: "Your OTP for RentEase",
+//       text: `Your OTP is: ${otp}`
+//     });
+
+//     res.status(200).json({ message: "OTP sent" });
+
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Email failed" });
+//   }
+// });
+
+// // ----------------------
+// // Send Confirmation Mail
+// // ----------------------
+// async function sendConfirmationEmail(email, productName, totalPrice, duration) {
+//   await transporter.sendMail({
+//     from: "RentEase",
+//     to: email,
+//     subject: "🎉 Rent Confirmation",
 //     html: `
-//       <h2>Thank you for renting from RentEase!</h2>
-//       <p>Product: <b>${productName}</b></p>
-//       <p>Duration: <b>${duration} months</b></p>
-//       <p>Total Price: <b>₹${totalPrice}</b></p>
-//       <p>We hope you enjoy your product! ✅</p>
+//       <h2>Rent Confirmed ✅</h2>
+//       <p><b>Product:</b> ${productName}</p>
+//       <p><b>Duration:</b> ${duration} months</p>
+//       <p><b>Total Price:</b> ₹${totalPrice}</p>
 //     `
-//   };
-
-//   await transporter.sendMail(mailOptions);
+//   });
 // }
 
 // // ----------------------
-// // Routes
+// // Rent API
 // // ----------------------
-// app.get("/", (req, res) => {
-//   res.send("Server is running 🚀");
-// });
-
-// app.get("/api/products", async (req, res) => {
-//   try {
-//     const data = await Product.find();
-//     res.json(data);
-//   } catch (err) {
-//     res.status(500).json({ error: "Failed to fetch products" });
-//   }
-// });
-
 // app.post("/api/rent", async (req, res) => {
 //   try {
-//     const { productId, duration, email } = req.body;
-//     const product = await Product.findById(productId);
-//     if (!product) return res.status(404).json({ message: "Product not found" });
+//     const { productId, duration, email, otp } = req.body;
+
+//     // OTP verify
+//     if (!otpStore[email] || otpStore[email] !== otp) {
+//       return res.status(400).json({ message: "Invalid OTP" });
+//     }
+
+//     delete otpStore[email];
+
+//     let product = null;
+
+//     // Try find in DB
+//     if (mongoose.Types.ObjectId.isValid(productId)) {
+//       product = await Product.findById(productId);
+//     }
+
+//     // fallback (for frontend products)
+//     if (!product) {
+//       product = {
+//         name: productId,
+//         price: 1000
+//       };
+//     }
 
 //     const totalPrice = product.price * duration;
 
+//     // ✅ SAVE RENT
+//     await Rent.create({
+//       productName: product.name,
+//       email,
+//       duration,
+//       totalPrice
+//     });
+
+//     // ✅ SEND EMAIL
 //     await sendConfirmationEmail(email, product.name, totalPrice, duration);
 
-//     res.json({ message: "Rent successful! Confirmation email sent.", totalPrice });
+//     res.status(200).json({
+//       message: "Rent successful & email sent",
+//       totalPrice
+//     });
+
 //   } catch (err) {
 //     console.error(err);
-//     res.status(500).json({ message: "Error processing rent" });
+//     res.status(500).json({ message: "Server error" });
 //   }
 // });
 
-// // Fallback route
-// app.use((req, res) => {
-//   res.status(404).send("Route not found");
+// // ----------------------
+// // Get Products
+// // ----------------------
+// app.get("/api/products", async (req, res) => {
+//   const data = await Product.find();
+//   res.json(data);
 // });
 
-// // ----------------------
-// // Start server
 // // ----------------------
 // app.listen(PORT, () => {
 //   console.log(`🚀 Server running on http://localhost:${PORT}`);
 // });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

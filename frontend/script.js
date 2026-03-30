@@ -1,10 +1,8 @@
-
-
-
 document.addEventListener("DOMContentLoaded", () => {
-  // Local fallback products (used if backend fails)
-  const fallbackProducts =[
  
+  const API_BASE = "https://rentease-backend.onrender.com";
+  
+  const fallbackProducts = [
     { name: "Sofa", price: 5000, image: "https://tse2.mm.bing.net/th/id/OIP.zonjMZycVTQ6PMcf2vjqIQHaFj?rs=1&pid=ImgDetMain&o=7&rm=3" },
     { name: "Dining Table", price: 3000, image: "https://thumbs.dreamstime.com/b/modern-dining-table-set-white-dishes-glassware-bright-clean-interior-contemporary-design-neutral-colors-332092613.jpg" },
     { name: "Bed", price: 4000, image: "https://tse1.mm.bing.net/th/id/OIP.kWKhP-xIf4jLxNLo3RETOwHaHa?rs=1&pid=ImgDetMain&o=7&rm=3" },
@@ -25,10 +23,10 @@ document.addEventListener("DOMContentLoaded", () => {
     { name:"Mixer", price:3200, image:"https://m.media-amazon.com/images/I/511ODG4v4GL._AC_SS450_.jpg"},
     { name:"Laundry basket", price:300, image:"https://images.woodenstreet.de/image/data/jasmey-homes/hand-crafted-jute-and-cotton-laundry-basket-white/White/1.jpg"},
     { name:"Fan", price:1400, image:"https://tse4.mm.bing.net/th/id/OIP.XD7hERA_EUYHIcOH-PooJAHaEO?rs=1&pid=ImgDetMain&o=7&rm=3"}
-];
+  ];
 
-  const container = document.getElementById("products"); // ✅ FIXED
-  const searchBar = document.getElementById("searchBar"); // ✅ FIXED
+  const container = document.getElementById("products");
+  const searchBar = document.getElementById("searchBar");
 
   const modal = document.getElementById("rent-modal");
   const modalName = document.getElementById("modal-product-name");
@@ -48,32 +46,26 @@ document.addEventListener("DOMContentLoaded", () => {
   // ----------------------
   function displayProducts(list) {
     if (!container) return;
-
     container.innerHTML = "";
 
     list.forEach(product => {
       const card = document.createElement("div");
       card.classList.add("product-card");
-
       card.innerHTML = `
         <img src="${product.image}" width="200">
         <h2>${product.name}</h2>
         <p>₹${product.price} / month</p>
         <button class="rent-btn">Rent Now</button>
       `;
-
       container.appendChild(card);
 
       card.querySelector(".rent-btn").addEventListener("click", () => {
         selectedProduct = product;
-
         modalName.textContent = product.name;
         modalPriceText.textContent = `₹${product.price} / month`;
-
         rentDuration.value = 1;
         rentEmail.value = "";
         rentOtp.value = "";
-
         confirmBtn.disabled = true;
         modal.style.display = "flex";
       });
@@ -84,14 +76,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // Load Products
   // ----------------------
   async function loadProducts() {
-    // Show fallback first
     allProducts = fallbackProducts;
     displayProducts(allProducts);
 
     try {
-      const res = await fetch("http://localhost:5000/api/products");
+      const res = await fetch(`${API_BASE}/api/products`);
       const data = await res.json();
-
       if (Array.isArray(data) && data.length > 0) {
         allProducts = data;
         displayProducts(allProducts);
@@ -107,11 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (searchBar) {
     searchBar.addEventListener("input", e => {
       const query = e.target.value.toLowerCase();
-
-      const filtered = allProducts.filter(p =>
-        p.name.toLowerCase().includes(query)
-      );
-
+      const filtered = allProducts.filter(p => p.name.toLowerCase().includes(query));
       displayProducts(filtered);
     });
   }
@@ -120,61 +106,33 @@ document.addEventListener("DOMContentLoaded", () => {
   // Send OTP
   // ----------------------
   sendOtpBtn.addEventListener("click", async () => {
-
-    if (!rentEmail.value) {
-      alert("Enter email first");
-      return;
-    }
+    if (!rentEmail.value) { alert("Enter email first"); return; }
 
     try {
-      const res = await fetch("http://localhost:5000/api/send-otp", {
+      const res = await fetch(`${API_BASE}/api/send-otp`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email: rentEmail.value
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: rentEmail.value })
       });
-
       const data = await res.json();
-
-      if (res.ok) {
-        alert("OTP sent to your email 📩");
-        confirmBtn.disabled = false;
-      } else {
-        alert("❌ " + data.message);
-      }
-
-    } catch (err) {
-      console.error(err);
-      alert("OTP failed");
-    }
+      if (res.ok) { alert("OTP sent to your email 📩"); confirmBtn.disabled = false; }
+      else { alert("❌ " + data.message); }
+    } catch (err) { console.error(err); alert("OTP failed"); }
   });
 
   // ----------------------
   // Confirm Rent
   // ----------------------
   confirmBtn.addEventListener("click", async () => {
-
-    if (!selectedProduct) {
-      alert("Select product first");
-      return;
-    }
-
-    if (!rentEmail.value || !rentOtp.value) {
-      alert("Enter email and OTP");
-      return;
-    }
+    if (!selectedProduct) { alert("Select product first"); return; }
+    if (!rentEmail.value || !rentOtp.value) { alert("Enter email and OTP"); return; }
 
     const duration = parseInt(rentDuration.value);
 
     try {
-      const res = await fetch("http://localhost:5000/api/rent", {
+      const res = await fetch(`${API_BASE}/api/rent`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           productId: selectedProduct._id || selectedProduct.name,
           duration: duration,
@@ -182,34 +140,25 @@ document.addEventListener("DOMContentLoaded", () => {
           otp: rentOtp.value
         })
       });
-
       const data = await res.json();
-
-      if (res.ok) {
-        alert("✅ Rent successful!\nTotal: ₹" + data.totalPrice);
-        modal.style.display = "none";
-      } else {
-        alert("❌ " + data.message);
-      }
-
-    } catch (err) {
-      console.error(err);
-      alert("Server error");
-    }
+      if (res.ok) { alert("✅ Rent successful!\nTotal: ₹" + data.totalPrice); modal.style.display = "none"; }
+      else { alert("❌ " + data.message); }
+    } catch (err) { console.error(err); alert("Server error"); }
   });
 
   // ----------------------
   // Cancel
   // ----------------------
-  cancelBtn.addEventListener("click", () => {
-    modal.style.display = "none";
-  });
+  cancelBtn.addEventListener("click", () => { modal.style.display = "none"; });
 
   // ----------------------
   // Init
   // ----------------------
   loadProducts();
 });
+
+
+
 
 
 
