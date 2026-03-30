@@ -1,7 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
- 
+
+  // 🔹 Deployed backend URL
   const API_BASE = "https://rentease-backend.onrender.com";
-  
+
+  // 🔹 Fallback products if backend fails
   const fallbackProducts = [
     { name: "Sofa", price: 5000, image: "https://tse2.mm.bing.net/th/id/OIP.zonjMZycVTQ6PMcf2vjqIQHaFj?rs=1&pid=ImgDetMain&o=7&rm=3" },
     { name: "Dining Table", price: 3000, image: "https://thumbs.dreamstime.com/b/modern-dining-table-set-white-dishes-glassware-bright-clean-interior-contemporary-design-neutral-colors-332092613.jpg" },
@@ -25,9 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
     { name:"Fan", price:1400, image:"https://tse4.mm.bing.net/th/id/OIP.XD7hERA_EUYHIcOH-PooJAHaEO?rs=1&pid=ImgDetMain&o=7&rm=3"}
   ];
 
+  // 🔹 DOM elements
   const container = document.getElementById("products");
   const searchBar = document.getElementById("searchBar");
-
   const modal = document.getElementById("rent-modal");
   const modalName = document.getElementById("modal-product-name");
   const modalPriceText = document.getElementById("modal-price-text");
@@ -41,9 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let selectedProduct = null;
   let allProducts = [];
 
-  // ----------------------
-  // Display Products
-  // ----------------------
+  // 🔹 Display products
   function displayProducts(list) {
     if (!container) return;
     container.innerHTML = "";
@@ -72,9 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ----------------------
-  // Load Products
-  // ----------------------
+  // 🔹 Load products from backend or fallback
   async function loadProducts() {
     allProducts = fallbackProducts;
     displayProducts(allProducts);
@@ -91,9 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ----------------------
-  // Search
-  // ----------------------
+  // 🔹 Search products
   if (searchBar) {
     searchBar.addEventListener("input", e => {
       const query = e.target.value.toLowerCase();
@@ -102,9 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ----------------------
-  // Send OTP
-  // ----------------------
+  // 🔹 Send OTP
   sendOtpBtn.addEventListener("click", async () => {
     if (!rentEmail.value) { alert("Enter email first"); return; }
 
@@ -120,9 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) { console.error(err); alert("OTP failed"); }
   });
 
-  // ----------------------
-  // Confirm Rent
-  // ----------------------
+  // 🔹 Confirm rent
   confirmBtn.addEventListener("click", async () => {
     if (!selectedProduct) { alert("Select product first"); return; }
     if (!rentEmail.value || !rentOtp.value) { alert("Enter email and OTP"); return; }
@@ -146,17 +138,13 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) { console.error(err); alert("Server error"); }
   });
 
-  // ----------------------
-  // Cancel
-  // ----------------------
+  // 🔹 Cancel modal
   cancelBtn.addEventListener("click", () => { modal.style.display = "none"; });
 
-  // ----------------------
-  // Init
-  // ----------------------
+  // 🔹 Initialize
   loadProducts();
-});
 
+});
 
 
 
