@@ -34,7 +34,7 @@ const Rent = mongoose.model("Rent", rentSchema);
 // Sample products
 // ----------------------
 const products = [
- { name: "Sofa", price: 5000, image: "https://tse2.mm.bing.net/th/id/OIP.zonjMZycVTQ6PMcf2vjqIQHaFj?rs=1&pid=ImgDetMain&o=7&rm=3" },
+  { name: "Sofa", price: 5000, image: "https://tse2.mm.bing.net/th/id/OIP.zonjMZycVTQ6PMcf2vjqIQHaFj?rs=1&pid=ImgDetMain&o=7&rm=3" },
   { name: "Dining Table", price: 3000, image: "https://thumbs.dreamstime.com/b/modern-dining-table-set-white-dishes-glassware-bright-clean-interior-contemporary-design-neutral-colors-332092613.jpg" },
   { name: "Bed", price: 4000, image: "https://tse1.mm.bing.net/th/id/OIP.kWKhP-xIf4jLxNLo3RETOwHaHa?rs=1&pid=ImgDetMain&o=7&rm=3" },
   { name: "Chair", price: 800, image: "https://ik.imagekit.io/2xkwa8s1i/img/npl_raw_images/Revamp/WDINEARVWOAC1MBBK/WDINEARVWOAC1MBBK-1.jpg?tr=w-640" },
@@ -70,6 +70,7 @@ mongoose.connect(process.env.MONGO_URI)
     }
   })
   .catch(err => console.log("❌ MongoDB connection error:", err));
+
 // ----------------------
 // OTP Store
 // ----------------------
@@ -86,6 +87,33 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+transporter.verify(function(error, success) {
+  if (error) console.log("❌ Email transporter error:", error);
+  else console.log("✅ Email transporter ready");
+});
+
+// ----------------------
+// Send Confirmation Mail (Safe)
+// ----------------------
+async function sendConfirmationEmail(email, productName, totalPrice, duration) {
+  try {
+    await transporter.sendMail({
+      from: `"RentEase" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "🎉 Rent Confirmation",
+      html: `
+        <h2>Rent Confirmed ✅</h2>
+        <p><b>Product:</b> ${productName}</p>
+        <p><b>Duration:</b> ${duration} months</p>
+        <p><b>Total Price:</b> ₹${totalPrice}</p>
+      `
+    });
+    console.log("✅ Confirmation email sent to", email);
+  } catch (err) {
+    console.warn("⚠️ Email not sent:", err.message);
+  }
+}
+
 // ----------------------
 // Send OTP
 // ----------------------
@@ -99,7 +127,7 @@ app.post("/api/send-otp", async (req, res) => {
 
   try {
     await transporter.sendMail({
-      from: "RentEase",
+      from: `"RentEase" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Your OTP for RentEase",
       text: `Your OTP is: ${otp}`
@@ -114,23 +142,6 @@ app.post("/api/send-otp", async (req, res) => {
 });
 
 // ----------------------
-// Send Confirmation Mail
-// ----------------------
-async function sendConfirmationEmail(email, productName, totalPrice, duration) {
-  await transporter.sendMail({
-    from: "RentEase",
-    to: email,
-    subject: "🎉 Rent Confirmation",
-    html: `
-      <h2>Rent Confirmed ✅</h2>
-      <p><b>Product:</b> ${productName}</p>
-      <p><b>Duration:</b> ${duration} months</p>
-      <p><b>Total Price:</b> ₹${totalPrice}</p>
-    `
-  });
-}
-
-// ----------------------
 // Rent API
 // ----------------------
 app.post("/api/rent", async (req, res) => {
@@ -143,6 +154,7 @@ app.post("/api/rent", async (req, res) => {
     }
     delete otpStore[email];
 
+    // Product fetch
     let product = null;
     if (mongoose.Types.ObjectId.isValid(productId)) {
       product = await Product.findById(productId);
@@ -158,9 +170,10 @@ app.post("/api/rent", async (req, res) => {
       totalPrice
     });
 
+    // 🔹 Safe email sending
     await sendConfirmationEmail(email, product.name, totalPrice, duration);
 
-    res.status(200).json({ message: "Rent successful & email sent", totalPrice });
+    res.status(200).json({ message: "Rent successful", totalPrice });
 
   } catch (err) {
     console.error(err);
@@ -182,8 +195,8 @@ app.get("/api/products", async (req, res) => {
 
 // ----------------------
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);});
-
+  console.log(`🚀 Server running on port ${PORT}`);
+});
 
 
 

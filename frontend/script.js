@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 
   // 🔹 Deployed backend URL
-  const API_BASE = "https://rentease-backend.onrender.com";
+  const API_BASE = "https://srikanthfurniture.up.railway.app";
 
   // 🔹 Fallback products if backend fails
   const fallbackProducts = [
@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   // 🔹 DOM elements
+   // 🔹 DOM elements
   const container = document.getElementById("products");
   const searchBar = document.getElementById("searchBar");
   const modal = document.getElementById("rent-modal");
@@ -114,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) { console.error(err); alert("OTP failed"); }
   });
 
-  // 🔹 Confirm rent
+  // 🔹 Confirm Rent
   confirmBtn.addEventListener("click", async () => {
     if (!selectedProduct) { alert("Select product first"); return; }
     if (!rentEmail.value || !rentOtp.value) { alert("Enter email and OTP"); return; }
@@ -126,16 +127,27 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          productId: selectedProduct._id || selectedProduct.name,
+          productId: selectedProduct._id ? selectedProduct._id : selectedProduct.name,
           duration: duration,
           email: rentEmail.value,
-          otp: rentOtp.value
+          otp: rentOtp.value,
+          price: selectedProduct.price
         })
       });
+
       const data = await res.json();
-      if (res.ok) { alert("✅ Rent successful!\nTotal: ₹" + data.totalPrice); modal.style.display = "none"; }
-      else { alert("❌ " + data.message); }
-    } catch (err) { console.error(err); alert("Server error"); }
+
+      if (res.ok) { 
+        alert("✅ Rent successful!\nTotal: ₹" + data.totalPrice); 
+        modal.style.display = "none"; 
+      } else { 
+        alert("❌ " + data.message); 
+      }
+
+    } catch (err) { 
+      console.error(err); 
+      alert("Server error"); 
+    }
   });
 
   // 🔹 Cancel modal
@@ -145,7 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadProducts();
 
 });
-
 
 
 
