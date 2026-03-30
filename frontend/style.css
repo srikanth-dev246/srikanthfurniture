@@ -1,0 +1,188 @@
+/* Body */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    text-align: center;
+    background-color: #f5f7fa;
+}
+
+/* Header */
+header {
+    background-color: green;
+    color: white;
+    padding: 40px 0;
+}
+
+header nav a {
+    color: white;
+    margin: 0 20px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* Main */
+main {
+    padding: 40px 20px;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+/* Search bar */
+#searchBar {
+    padding: 10px;
+    width: 260px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-bottom: 30px;
+}
+
+/* Products container */
+#products {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* ✅ PRODUCT CARD (FIXED) */
+.product-card {
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    width: 250px;
+    padding: 0; /* 🔥 FIX: remove extra gap */
+    background: white;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: 0.3s;
+    overflow: hidden; /* important */
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0,0,0,0.2);
+}
+
+/* ✅ IMAGE FULL FIT */
+.product-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px 12px 0 0; /* top corners only */
+}
+
+/* Content spacing */
+.product-card h2,
+.product-card p,
+.product-card button {
+    padding: 0 15px;
+}
+
+/* Title */
+.product-card h2 {
+    margin: 10px 0;
+}
+
+/* Price */
+.product-card p {
+    color: #555;
+    margin-bottom: 10px;
+}
+
+/* Button */
+.product-card button {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: none;
+    background: linear-gradient(45deg, #3498db, #6dd5fa);
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.product-card button:hover {
+    transform: scale(1.05);
+}
+
+/* Sections */
+section {
+    padding: 40px 20px;
+    background: #fff;
+    margin-top: 20px;
+}
+
+section h2 {
+    margin-bottom: 15px;
+}
+
+section p {
+    max-width: 700px;
+    margin: auto;
+    line-height: 1.6;
+}
+
+section ul {
+    text-align: left;
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+/* Contact form */
+form {
+    max-width: 400px;
+    margin: auto;
+    text-align: left;
+}
+
+form input,
+form textarea {
+    width: 100%;
+    padding: 8px;
+    margin: 8px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+form button {
+    width: 100%;
+    padding: 10px;
+    background: green;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Modal */
+#rent-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+}
+
+/* Modal content */
+#rent-modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+}
+
+#rent-modal-content input {
+    width: 90%;
+    padding: 8px;
+    margin: 8px 0;
+}
+
+#rent-modal-content button {
+    margin: 5px;
+    padding: 8px 12px;
+}

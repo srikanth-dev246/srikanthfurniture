@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RentEase - Products</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+ 
+  <header>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main id="home">
+    <h1>Our Furniture Collection</h1>
+
+    <!-- ✅ FIXED ID -->
+    <input type="text" id="searchBar" placeholder="Search for products...">
+
+    <!-- ✅ FIXED ID -->
+    <div class="products-container" id="products"></div>
+  </main>
+
+  <!-- About Section -->
+  <section id="about">
+    <h2>About Our Furniture</h2>
+    <p>
+      Furniture is more than just utility — it defines the style, comfort, and personality of your home.
+      At RentEase, we provide modern, durable, and affordable furniture for every room.
+    </p>
+    <ul>
+      <li>✔ Wide range of products — sofas, beds, dining tables, storage solutions, and more.</li>
+      <li>✔ Flexible rental plans so you pay only for the months you need.</li>
+      <li>✔ High-quality materials designed for durability and comfort.</li>
+      <li>✔ Hassle-free delivery and setup at your doorstep.</li>
+      <li>✔ Eco-friendly approach — reuse and recycle to reduce waste.</li>
+    </ul>
+    <p>
+      Whether you’re setting up a new home, upgrading your interiors, or just need temporary solutions,
+      RentEase makes it easy to enjoy stylish furniture without the heavy upfront cost.
+    </p>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact">
+    <h2>Contact Us</h2>
+    <p>Have questions or need assistance? We’d love to hear from you!</p>
+    <p><strong>Email:</strong> support@rentease.com</p>
+    <p><strong>Phone:</strong> +91 7702905691</p>
+    <p><strong>Address:</strong> RentEase HQ, Hyderabad, India</p>
+
+    <form>
+      <label>Your Name:</label>
+      <input type="text" required>
+
+      <label>Your Email:</label>
+      <input type="email" required>
+
+      <label>Message:</label>
+      <textarea rows="4" required></textarea>
+
+      <button type="submit">Send Message</button>
+    </form>
+  </section>
+
+  <!-- Rent Modal -->
+  <div id="rent-modal" style="display:none;">
+    <div id="rent-modal-content">
+      <h3 id="modal-product-name"></h3>
+      <p id="modal-price-text"></p>
+
+      <label>Select Duration (months):</label>
+      <input type="number" id="rent-duration" min="1" value="1">
+
+      <label>Your Email:</label>
+      <input type="email" id="rent-email" placeholder="Enter your email">
+
+      <label>Enter OTP:</label>
+      <input type="text" id="rent-otp" placeholder="Enter OTP">
+
+      <button id="send-otp-btn">Send OTP</button>
+      <br><br>
+      <button id="confirm-rent-btn">Confirm Rent</button>
+      <button id="cancel-rent-btn">Cancel</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
