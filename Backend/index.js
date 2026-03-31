@@ -133,9 +133,10 @@ app.post("/api/send-otp", async (req, res) => {
       text: `Your OTP is: ${otp}`
     });
 
-    res.status(200).json({ message: "OTP sent" });
-
-  } catch (err) {
+    
+res.status(200).json({ message: "OTP sent", otp });
+  
+  }catch (err) {
     console.error(err);
 
     // 🔹 FIX: frontend ki proper response ivvali

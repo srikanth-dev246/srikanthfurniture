@@ -1,8 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 
   // 🔹 Deployed backend URL
-  const API_BASE = "https://srikanthfurniture.up.railway.app";
-
+  const API_BASE = "https://srikanthfurniture-production.up.railway.app";
   // 🔹 Fallback products if backend fails
   const fallbackProducts = [
     { name: "Sofa", price: 5000, image: "https://tse2.mm.bing.net/th/id/OIP.zonjMZycVTQ6PMcf2vjqIQHaFj?rs=1&pid=ImgDetMain&o=7&rm=3" },
@@ -137,12 +136,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await res.json();
 
-      if (res.ok) { 
-        alert("✅ Rent successful!\nTotal: ₹" + data.totalPrice); 
-        modal.style.display = "none"; 
-      } else { 
-        alert("❌ " + data.message); 
-      }
+      if (res.ok) {
+  alert("Your OTP is: " + data.otp);
+  confirmBtn.disabled = false;
+} else {
+  alert("❌ " + data.message);
+}
 
     } catch (err) { 
       console.error(err); 
