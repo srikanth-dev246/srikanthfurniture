@@ -113,6 +113,7 @@ async function sendConfirmationEmail(email, productName, totalPrice, duration) {
   }
 }
 
+
 // ----------------------
 // Send OTP
 // ----------------------
@@ -137,10 +138,10 @@ app.post("/api/send-otp", async (req, res) => {
   } catch (err) {
     console.error(err);
 
-    // 🔥 IMPORTANT CHANGE
-    res.status(200).json({ 
+    // 🔹 FIX: frontend ki proper response ivvali
+    res.status(500).json({ 
       message: "Email failed but OTP generated",
-      otp: otp
+      otp: otp  // only for testing, production lo remove
     });
   }
 });
