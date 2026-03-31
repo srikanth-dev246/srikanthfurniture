@@ -79,17 +79,16 @@ let otpStore = {};
 // ----------------------
 // Mail Setup
 // ----------------------
+console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "SET" : "NOT SET");
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   }
-});
-
-transporter.verify(function(error, success) {
-  if (error) console.log("❌ Email transporter error:", error);
-  else console.log("✅ Email transporter ready");
 });
 
 // ----------------------
@@ -137,7 +136,12 @@ app.post("/api/send-otp", async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Email failed" });
+
+    // 🔥 IMPORTANT CHANGE
+    res.status(200).json({ 
+      message: "Email failed but OTP generated",
+      otp: otp
+    });
   }
 });
 
